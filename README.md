@@ -2,14 +2,12 @@ This is a set of ansible scripts for setting up a mac laptop.
 
 # Bootstrapping
 
-As a user of the script, the first thing to do is to install brew and ansible. Run ./bootstrap.sh to do so.
+As a user of the script, the first thing to do is to 
+- install xcode command line tools
+- brew
+- ansible. 
 
-
-
-
-
-
-
+Run ./bootstrap.sh to do so.
 
 
 # Setting up a Dev Environment
@@ -25,6 +23,13 @@ As a developer of these scripts, you will need an environment to test the script
 - Install Parallels Tools
 
 - Run sudo systemsetup -setremotelogin on, to turn on ssh access
+
+- create an admin user with same login as the mac (not necessary but helpful)
+
+- ssh-copy-id (ip address of new machine), to copy your ssh id_rsa.pub to remote machine, and allow passwordless login
+
+
+
 
 You can also do this in virtual box, following instructions [here](https://www.howtogeek.com/289594/how-to-install-macos-sierra-in-virtualbox-on-windows-10/).
 
