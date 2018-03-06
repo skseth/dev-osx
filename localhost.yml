@@ -1,6 +1,7 @@
 - hosts: localhost
   roles:
     - productivity
+    - cmdline
 
 # remove gnu-autotools
 

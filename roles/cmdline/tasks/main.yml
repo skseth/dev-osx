@@ -1,0 +1,24 @@
+---
+- name: fswatch - a file system watcher
+  homebrew: name="fswatch"
+
+- name: autojump - use j to jump to a directory
+  homebrew: name="autojump" state="present"
+
+#    brew_bashrc_script "/etc/autojump.sh"
+- name: bash-completion
+  homebrew: name="bash-completion" state="present"
+#    brew_bashrc_script "/etc/bash_completion"
+
+- name: tree - view directories in an ascii tree
+  homebrew: name="tree" state="present"
+
+- name: graphviz - for diagrams from text specifications
+  homebrew: name="graphviz" state="present"
+
+- name: fzf - fuzzy file search
+  homebrew: name="fzf" state="present"
+
+# TODO : run /usr/local/opt/fzf/install
+# bashrc_source_script ~/.fzf.bash
+# bashrc_export "FZF_DEFAULT_OPTS" "--extended"
