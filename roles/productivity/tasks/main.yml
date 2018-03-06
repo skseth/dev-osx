@@ -1,0 +1,12 @@
+---
+- name: chrome
+  homebrew_cask: name="google-chrome" state="present"
+
+- name: dropbox
+  homebrew_cask: name="dropbox" state="present"
+
+- name: zoomus
+  homebrew_cask: name="zoomus" state="present"
+
+- name: macdown
+  homebrew_cask: name="macdown" state="present"

@@ -1,0 +1,9 @@
+---
+- name: check brew installed
+#  shell: eval `/usr/libexec/path_helper -s` && command -v brew >/dev/null 2>&1
+  shell: env
+  register: is_brew_installed
+  failed_when: is_brew_installed.rc != 0
+
+
+

@@ -1,0 +1,8 @@
+- hosts: localhost
+  roles:
+    - productivity
+
+# remove gnu-autotools
+
+
+
