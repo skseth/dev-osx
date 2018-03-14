@@ -5,10 +5,26 @@
 - name: autojump - use j to jump to a directory
   homebrew: name="autojump" state="present"
 
-#    brew_bashrc_script "/etc/autojump.sh"
+- name: autojump - update bashrc
+  blockinfile:
+    path: ~/.bashrc
+    state: present
+    marker: "# {mark} autojump setup"
+    create: yes
+    block: |
+      [ -f "/usr/local/etc/profile.d/autojump.sh" ] && source "/usr/local/etc/profile.d/autojump.sh"
+
 - name: bash-completion
   homebrew: name="bash-completion" state="present"
-#    brew_bashrc_script "/etc/bash_completion"
+
+- name: bash-completion - update bashrc
+  blockinfile:
+    path: ~/.bashrc
+    state: present
+    marker: "# {mark} bash-completion setup"
+    create: yes
+    block: |
+      [ -f "/usr/local/etc/bash_completion" ] && source "/usr/local/etc/bash_completion"
 
 - name: tree - view directories in an ascii tree
   homebrew: name="tree" state="present"
@@ -18,6 +34,7 @@
 
 - name: fzf - fuzzy file search
   homebrew: name="fzf" state="present"
+
 
 # TODO : run /usr/local/opt/fzf/install
 # bashrc_source_script ~/.fzf.bash

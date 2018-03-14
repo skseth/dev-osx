@@ -1,0 +1,37 @@
+---
+# Ideas from http://www.nickhammond.com/resolving-dev-to-localhost-with-ansible-and-nginx-on-os-x/
+# and from Kris Reese : https://www.youtube.com/watch?v=P2kiinwg00c
+
+- name: Install dnsmasq
+  homebrew: name=dnsmasq state=present
+
+- name: Add *.test resolver
+  become: yes
+  lineinfile:
+    state: present
+    line: nameserver 127.0.0.1
+    create: yes
+    dest: /etc/resolver/test
+    owner: root
+    group: wheel
+
+- name: Resolve *.test to localhost
+  blockinfile:
+    path: /usr/local/etc/dnsmasq.conf
+    state: present
+    create: yes
+    block: |
+      bogus-priv
+      domain=dev.test
+      expand-hosts
+      no-hosts
+      addn-hosts=/Users/samir/.dev/hostnames.txt
+      local=/dev.test/    
+      domain-needed
+      no-resolv
+      no-poll
+      server=8.8.8.8
+      server=8.8.4.4      
+      address=/.test/10.0.15.1
+  notify: restart dnsmasq
+

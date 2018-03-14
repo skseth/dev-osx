@@ -1,0 +1,49 @@
+
+# https://hub.github.com/
+- name: Hub - github command-line tool
+  homebrew: name="hub" state="present"
+
+- name: Update profile for hub
+  blockinfile:
+    path: ~/.profile
+    state: present
+    marker: "# {mark} HUB SETUP"
+    create: yes
+    block: |
+      eval "$(hub alias -s)"
+
+- git_config:
+    name: credential.helper
+    scope: global
+    value: osxkeychain
+
+- git_config:
+    name: user.name
+    scope: global
+    value: "{{ dev_git_user_name }}"
+
+- git_config: 
+    name: user.email
+    scope: global
+    value: "{{ dev_email }}"
+
+- name: generate ssh key
+  user:
+    name: '{{ dev_login_id }}'
+    generate_ssh_key: yes
+    ssh_key_bits: 4096
+    ssh_key_file: .ssh/id_rsa
+    ssh_key_passphrase: '{{ dev_ssh_passphrase }}'
+    ssh_key_type: rsa
+    state: present
+
+- name: upload github keys
+  github_key: 
+    name: Dev ssh key
+    pubkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    token: "{{ dev_github_token }}"
+    state: present
+
+
+
+#TODO : vscode extension - "Gist Extension" by ken howard

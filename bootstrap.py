@@ -8,10 +8,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 HOME = os.path.expanduser("~")
-DOT_PROFILE = "%s/.profile" % (HOME)
 DEV = "%s/.dev" % (HOME) 
-BOOTSTRAP_PROFILE="%s/bootstrap-profile.sh" % (DEV)
-PROFILE_DIR="%s/profile" % (DEV)
 PWD_CLIENT="%s/pwd-client.sh" % (DEV)
 BIN_DIR="%s/bin" % (DEV)
 INV_DIR="%s/inventory" % (DEV)
@@ -19,21 +16,6 @@ GRP_DIR="%s/inventory/group_vars" % (DEV)
 ALL_YML="%s/all.yml" % (GRP_DIR)
 KEYCHAIN_SERVICE="devsetup"
 KEYCHAIN_ACCOUNT="master"
-
-BOOTSTRAP_SCRIPT = '''
-BIN_DIR="%s"
-PROFILE_DIR="%s"
-export PATH="${BIN_DIR}":$PATH
-shopt -s nullglob
-for i in "${PROFILE_DIR}/*.profile.sh"; do
-    . $i
-done
-''' % (BIN_DIR, PROFILE_DIR)
-
-PROFILE_APPEND_SCRIPT='''
-BOOTSTRAP_PROFILE="%s"
-[ -f ${BOOTSTRAP_PROFILE} ] && . ${BOOTSTRAP_PROFILE}
-''' % (BOOTSTRAP_PROFILE)
 
 PWD_CLIENT_SCRIPT='''
 PWD=$(security find-generic-password -s %s -a %s -w 2>/dev/null)
@@ -179,40 +161,33 @@ def ansible_install():
 
 def create_dirs():
     make_dir_if_missing(DEV)
-    make_dir_if_missing(PROFILE_DIR)
     make_dir_if_missing(BIN_DIR)
     make_dir_if_missing(INV_DIR)
     make_dir_if_missing(GRP_DIR)
 
-def update_profile():
-    profile = read_file(DOT_PROFILE)
-
-    if BOOTSTRAP_PROFILE not in profile:
-        profile += PROFILE_APPEND_SCRIPT
-        write_to_file(DOT_PROFILE, profile)
-        logger.info(".profile updated")
-    else:
-        logger.info(".profile already updated")
 
 def capture_input(master):
     config = DevConfig(ALL_YML, master)
+    config.add_param("dev_user_home", HOME)
+    config.add_param("dev_config_root", DEV)
     config.add_param_prompt("dev_name", "Your Name: ")
+    config.add_param_prompt("dev_login_id", "Your login id: ")
     config.add_param_prompt("dev_email", "Your Email: ")
     config.add_param_prompt("dev_git_user_name", "Your Git user name: ")
+    config.add_param_prompt("ansible_become_pass", "Sudo password for ansible: ", True)
     config.add_param_prompt("dev_email_pwd", "Your Email Password: ", True)
     config.add_param_prompt("dev_ssh_passphrase", "Your SSH Password: ", True)
     config.add_param_prompt("dev_github_token", "Your Github token: ", True)
+    config.add_param_prompt("dev_brew_github_token", "Your Homebrew Github token: ", True)
     config.save()
 
 def main():
     
-    masterpwd = KeychainPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT)
-    masterpwd.ensure_pwd()
     brew_install()
     ansible_install()
+    masterpwd = KeychainPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT)
+    masterpwd.ensure_pwd()
     create_dirs()
-    write_to_file_if_missing(BOOTSTRAP_PROFILE, BOOTSTRAP_SCRIPT)
-    update_profile()
     capture_input(masterpwd)
     write_to_file_if_missing(PWD_CLIENT, PWD_CLIENT_SCRIPT)
 

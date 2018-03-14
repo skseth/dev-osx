@@ -1,9 +1,10 @@
 - hosts: localhost
   roles:
-    - productivity
-    - cmdline
-
-# remove gnu-autotools
+#     - productivity
+     - dev-basics
+  vars:
+    - dev_workspace_root: "{{ dev_user_home }}/dev"
+    - dev_gopath_root: "{{ dev_user_home }}/dev/go"
 
 
 

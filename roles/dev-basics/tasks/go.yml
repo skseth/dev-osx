@@ -1,0 +1,23 @@
+
+- name: Install golang
+  homebrew: name=golang state=present
+
+- name: create gopath directories
+  file: 
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ dev_gopath_root }}"
+    - "{{ dev_gopath_root }}/src"
+    - "{{ dev_gopath_root }}/bin"
+    - "{{ dev_gopath_root }}/pkg"
+
+- name: Update profile for golang
+  blockinfile:
+    path: ~/.profile
+    state: present
+    marker: "# {mark} GOLANG SETUP"
+    create: yes
+    block: |
+      export GOPATH={{ dev_gopath_root }}
+      export PATH=$PATH:$GOPATH/bin

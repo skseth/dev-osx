@@ -1,9 +1,16 @@
 ---
 - name: check brew installed
-#  shell: eval `/usr/libexec/path_helper -s` && command -v brew >/dev/null 2>&1
-  shell: env
+  shell: command -v brew >/dev/null 2>&1
   register: is_brew_installed
+  changed_when: 0 != 0
   failed_when: is_brew_installed.rc != 0
 
-
+- name: Update profile for brew
+  blockinfile:
+    path: ~/.profile
+    state: present
+    marker: "# {mark} BREW SETUP"
+    create: yes
+    block: |
+      export HOMEBREW_GITHUB_API_TOKEN={{ dev_brew_github_token }}
 

@@ -1,0 +1,4 @@
+---
+- name: restart dnsmasq
+  become: yes
+  command: brew services restart dnsmasq

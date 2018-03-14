@@ -1,0 +1,24 @@
+---
+- import_tasks: cmdline.yml
+  tags: ['cmdline']
+- import_tasks: vscode.yml
+  tags: ['vscode']
+- import_tasks: dns.yml
+  tags: ['dns']
+- import_tasks: github.yml
+  tags: ['github']
+- import_tasks: go.yml
+  tags: ['go']
+- import_tasks: gnuautotools.yml
+  tags: ['autotools']
+
+
+
+# TODO - consider moving this to optional 
+#- name: Bazel
+#  brew: name="bazel"
+#- name: Sublime Text
+#  brew: name="sublime-text" iscask=true
+# TODO - license for sublime
+# ln -s /Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl /usr/local/bin/sublime
+

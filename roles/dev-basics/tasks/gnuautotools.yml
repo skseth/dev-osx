@@ -1,0 +1,6 @@
+- name: Install gnu autotools
+  homebrew: name={{ item }} state=present
+  with_items:
+    - autoconf
+    - automake
+    - libtool
