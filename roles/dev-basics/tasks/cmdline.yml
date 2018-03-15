@@ -29,6 +29,9 @@
 - name: tree - view directories in an ascii tree
   homebrew: name="tree" state="present"
 
+- name: jq - json query
+  homebrew: name="jq" state="present"
+
 - name: graphviz - for diagrams from text specifications
   homebrew: name="graphviz" state="present"
 
