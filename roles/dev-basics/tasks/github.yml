@@ -3,6 +3,11 @@
 - name: Hub - github command-line tool
   homebrew: name="hub" state="present"
 
+# https://hub.github.com/
+- name: Gitup - git updater
+  homebrew_cask: name="gitup" state="present"
+
+
 - name: Update profile for hub
   blockinfile:
     path: ~/.profile
