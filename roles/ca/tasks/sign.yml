@@ -1,0 +1,39 @@
+---
+
+- name: "create {{ subj_dir }}"
+  file: 
+    path: "{{ subj_dir }}"
+    state: directory
+
+- name: "generate {{ subj_name }} private key"
+  command: openssl genrsa -out "{{ subj_name }}.key.pem" 2048
+  args:
+    chdir: "{{ subj_dir }}"
+    creates: "{{ subj_dir }}/{{ subj_name }}.key.pem"
+
+- name: "generate {{ subj_name }} csr config"
+  template:
+    src: csr.ini.j2
+    dest: "{{ subj_dir }}/csr.ini"
+
+
+- name: "generate csr for {{ subj_name }}"
+  shell: openssl req -new -sha256 -key "{{ subj_dir }}/{{ subj_name }}.key.pem" -out "csr/{{ subj_name }}.csr.pem" -config <( cat "{{ subj_dir }}/csr.ini" ) executable=/bin/bash
+  args:
+    chdir: "{{ sign_ca.dir }}"
+    creates: "{{ sign_ca.dir }}/csr/{{ subj_name }}.csr.pem"
+
+
+- name: "generate {{ subj_name }} ca cert"
+  command: openssl ca -batch -config openssl.cnf -extensions "{{ subj_extension }}" -passin stdin -days 3650 -notext -md sha256 -in "csr/{{ subj_name }}.csr.pem" -out "certs/{{ subj_name }}.cert.pem"
+  args:
+    stdin: "{{ sign_ca.passphrase }}"
+    chdir: "{{ sign_ca.dir }}"
+    creates: "{{ sign_ca.dir }}/certs/{{ subj_name }}.cert.pem"
+
+- name: "generate {{ subj_name }} chained cert file"
+  shell: cat "certs/{{ subj_name }}.cert.pem" "certs/ca-chain.cert" > "{{ subj_dir }}/{{ subj_name }}.chain.cert"
+  args:
+    chdir: "{{ sign_ca.dir }}"
+    creates: "{{ subj_dir }}/{{ subj_name }}.chain.cert"
+

@@ -1,0 +1,102 @@
+---
+# https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/1.8.0/docs/04-certificate-authority.md
+# https://www.tauceti.blog/post/kubernetes-the-not-so-hard-way-with-ansible-at-scaleway-part-4/
+
+# https://jamielinux.com/docs/openssl-certificate-authority/create-the-root-pair.html
+
+
+- name: "create  {{ ca.name }} directory "
+  file:
+    path: "{{ ca.dir }}"
+    state: directory
+
+- name: "create  {{ ca.name }} structure"
+  file:
+    path: "{{ ca.dir }}/{{ item }}"
+    state: directory
+  with_items: 
+    - certs
+    - crl 
+    - newcerts 
+    - private
+
+- name: "create  {{ ca.name }} csr directory"
+  file:
+    path: "{{ ca.dir }}/csr"
+    state: directory
+  when: ca.name != ca_root.name
+
+- file: 
+    path: "{{ ca.dir }}/private"
+    mode: 0700
+
+- name: "create {{ ca.name }} ca index.txt"
+  copy:
+    content: ""
+    dest: "{{ ca.dir }}/index.txt"
+    force: no
+
+- name: "create {{ ca.name }} ca serial"
+  copy:
+    content: "1000"
+    dest: "{{ ca.dir }}/serial"
+    force: no
+
+- name: "create {{ ca.name }} crlnumber"
+  copy:
+    content: "1000"
+    dest: "{{ ca.dir }}/crlnumber"
+    force: no
+  when: ca.name != ca_root.name
+
+- name: create openssl.cnf
+  template:
+    src: openssl.cnf.j2
+    dest: "{{ ca.dir }}/openssl.cnf"
+
+- name: "generate {{ ca.name }} ca private key"
+  command: openssl genrsa -aes256 -passout stdin -out private/{{ ca.name }}.key.pem 4096
+  args:
+    stdin: "{{ ca.passphrase }}"
+    chdir: "{{ ca.dir }}"
+    creates: "{{ ca.dir }}/private/{{ ca.name }}.key.pem"
+
+- file: 
+    path: "{{ ca.dir }}/private/{{ ca.name }}.key.pem"
+    mode: 0400
+
+- name: "generate root ca public cert"
+  command: openssl req -config openssl.cnf -key "private/{{ ca.name }}.key.pem" -passin stdin -new -x509 -days 7300 -sha256 -extensions v3_ca -out "certs/{{ ca.name }}.cert.pem" -subj "/C=IN/ST=Karnataka/L=Bangalore/O=test/CN=LocalTest {{ ca.name }} CA"
+  args:
+    stdin: "{{ ca.passphrase }}"
+    chdir: "{{ ca.dir }}"
+    creates: "{{ ca.dir }}/certs/{{ ca.name }}.cert.pem"
+  notify: load rootcert
+  when: ca.name == ca_root.name
+
+- name: "generate csr for intermediate ca"
+  command: openssl req -config openssl.cnf -new -sha256 -key "private/{{ ca.name }}.key.pem" -passin stdin -subj "/C=IN/ST=Karnataka/L=Bangalore/O=test/CN=LocalTest {{ ca.name }} CA" -out "csr/{{ ca.name }}.csr.pem" 
+  args:
+    stdin: "{{ ca.passphrase }}"
+    chdir: "{{ ca.dir }}"
+    creates: "{{ ca.dir }}/csr/{{ ca.name }}.csr.pem"
+  when: ca.name != ca_root.name
+
+- name: "generate {{ ca.name }} ca cert"
+  command: openssl ca -batch -config "{{ ca_root.dir }}/openssl.cnf" -extensions v3_intermediate_ca -passin stdin -days 3650 -notext -md sha256 -in "{{ ca.dir }}/csr/{{ ca.name }}.csr.pem" -out "{{ ca.dir }}/certs/{{ ca.name }}.cert.pem"
+  args:
+    stdin: "{{ ca_root.passphrase }}"
+    chdir: "{{ ca.dir }}"
+    creates: "{{ ca.dir }}/certs/{{ ca.name }}.cert.pem"
+  when: ca.name != ca_root.name
+
+- file: 
+    path: "{{ ca.dir }}/certs/{{ ca.name }}.cert.pem"
+    mode: 0444
+
+- name: "generate {{ ca.name }} chain file"
+  shell: cat "certs/{{ ca.name }}.cert.pem" "{{ ca_root.dir }}/certs/root.cert.pem" > "certs/ca-chain.cert"
+  args:
+    chdir: "{{ ca.dir }}"
+    creates: "{{ ca.dir }}/certs/ca-chain.cert"
+  when: ca.dir != ca_root.dir

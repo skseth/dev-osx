@@ -1,0 +1,21 @@
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+req_extensions = req_ext
+distinguished_name = dn
+
+[ dn ]
+C=IN
+ST=Karnataka
+L=Bangalore
+O=Local
+OU=Test
+emailAddress=admin@local.test
+CN = {{ subj_cn }}
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = {{ subj_cn }}

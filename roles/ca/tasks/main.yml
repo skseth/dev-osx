@@ -1,0 +1,25 @@
+---
+- name: 'Create root CA'
+  import_tasks: ca.yml
+  vars:
+    ca: '{{ ca_root }}'
+
+
+- name: 'Create int CA'
+  include_tasks: ca.yml
+  vars:
+    ca: '{{ outer_item.value }}'
+  with_dict: '{{ ca_ints }}'
+  loop_control:
+    loop_var: outer_item
+
+- name: 'Sign server certs'
+  include_tasks: sign.yml
+  vars:
+    subj_dir: '{{ ca_root_dir }}/request/{{ item.key }}'
+    subj_name: '{{ item.key }}'
+    subj_cn: '{{ item.value.cn }}'
+    subj_extension: server_cert
+    sign_ca: '{{ ca_default }}'
+  with_dict: '{{ certs_to_sign }}'
+

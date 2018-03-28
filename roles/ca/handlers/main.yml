@@ -1,0 +1,4 @@
+---
+- name: load rootcert
+  become: yes
+  command: security -v add-trusted-cert -d -r trustRoot -p ssl -p basic -k /Library/Keychains/System.keychain "{{ ca_root.dir }}/certs/{{ ca_root.name }}.cert.pem"

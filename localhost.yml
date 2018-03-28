@@ -1,10 +1,21 @@
+---
 - hosts: localhost
-  roles:
-#     - productivity
-     - dev-basics
-  vars:
-    - dev_workspace_root: "{{ dev_user_home }}/dev"
-    - dev_gopath_root: "{{ dev_user_home }}/dev/go"
+  gather_facts: no
+  tasks:
 
+  - import_role:
+      name: dev-basics
+    tags:
+      - ca
 
+  - import_role: 
+      name: ca
+    vars:
+      ca_root_dir: '{{ dev_config_root }}/ca'
+      ca_root: '{{ dev_ca_root }}'
+      ca_ints: '{{ dev_int_cas }}'
+      certs_to_sign: '{{  dev_certs }}'
+      ca_default: '{{ dev_int_cas.intermediate }}'
+    tags:
+      - ca
 
