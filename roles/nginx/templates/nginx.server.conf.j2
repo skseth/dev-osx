@@ -1,0 +1,59 @@
+
+{% if 'upstream' in server %}
+upstream {{ server.name }} {
+{% for ups in server.upstream %}
+    server {{ ups }};
+}
+{% endfor %}
+{% endif %}
+
+server {
+
+{% if 'cert' in server %}
+    listen 443 ssl;
+    ssl on;
+    ssl_certificate {{ server.cert }};
+    ssl_certificate_key {{ server.privatekey }};
+{% else %}
+    listen 80;
+{% endif %}
+
+    server_name {{ server.serverpattern if 'serverpattern' in server else server.cn }};
+
+    access_log /usr/local/var/log/nginx/{{ server.name }}.access.log;
+
+{% if 'options' in server %}
+{% for opt in server.options %}
+    {{ opt }};
+{% endfor %}
+{% endif %}    
+
+{% if 'locations' in server %}
+{% for loc in server.locations %}
+    location {{ loc.path }} {
+
+{% if 'options' in loc %}
+{% for locopt in loc.options %}
+    {{ locopt }}
+{% endfor %}
+{% endif %}
+
+{% if 'proxy' in loc %}
+        proxy_pass                          http://{{ loc.proxy.upstream }};
+        proxy_set_header  Host              $http_host;   # required for docker client's sake
+        proxy_set_header  X-Real-IP         $remote_addr; # pass on real client's IP
+        proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header  X-Forwarded-Proto $scheme;
+
+{% if 'options' in loc.proxy %}
+{% for proxyopt in loc.proxy.options %}
+        {{ proxyopt }};
+{% endfor %}
+{% endif %}
+
+{% endif %}
+    }
+
+{% endfor %}
+{% endif %}    
+}

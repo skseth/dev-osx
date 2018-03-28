@@ -1,0 +1,18 @@
+
+- name: Install nginx
+  homebrew: name=nginx state=present
+
+- name: Add nginx.conf for .dev
+  template:
+    src: nginx.conf.j2
+    dest: /usr/local/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: generate server configs
+  template:
+    src: "nginx.server.conf.j2"
+    dest: "/usr/local/etc/nginx/servers/{{ item.key }}.conf"
+  vars:
+    server: "{{ item.value }}"
+  with_dict: '{{ nginx_servers }}'
+  notify: restart nginx

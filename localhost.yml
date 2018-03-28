@@ -19,3 +19,9 @@
     tags:
       - ca
 
+  - import_role: 
+      name: nginx
+    vars:
+      nginx_servers: '{{ dev_servers }}'
+    tags:
+      - nginx
