@@ -19,7 +19,9 @@
     subj_dir: '{{ ca_root_dir }}/request/{{ item.key }}'
     subj_name: '{{ item.key }}'
     subj_cn: '{{ item.value.cn }}'
-    subj_extension: server_cert
+    subj_extension: "{{ item.value['extension'] if 'extension' in item.value else 'server_cert' }}"
+    subj_dns: "{{ item.value.dns if 'dns' in item.value else [] }}"
+    subj_ips: "{{ item.value.ips if 'ips' in item.value else []}}"
     sign_ca: '{{ ca_default }}'
   with_dict: '{{ certs_to_sign }}'
 

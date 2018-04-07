@@ -18,4 +18,10 @@ CN = {{ subj_cn }}
 subjectAltName = @alt_names
 
 [ alt_names ]
-DNS.1 = {{ subj_cn }}
+{% for dns in subj_dns %}
+DNS.{{ loop.index }} = {{ dns }}
+{% endfor %}
+{% for ip in subj_ips %}
+IP.{{ loop.index }} = {{ ip }}
+{% endfor %}
+
