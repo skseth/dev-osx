@@ -38,6 +38,8 @@
 - name: fzf - fuzzy file search
   homebrew: name="fzf" state="present"
 
+- name: watchman
+  homebrew: name="watchman" state="present"
 
 # TODO : run /usr/local/opt/fzf/install
 # bashrc_source_script ~/.fzf.bash
