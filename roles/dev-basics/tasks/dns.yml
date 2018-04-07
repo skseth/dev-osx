@@ -32,6 +32,7 @@
       no-poll
       server=8.8.8.8
       server=8.8.4.4      
+      address=/mgmt.local.test/10.0.15.10
       address=/.test/10.0.15.1
   notify: restart dnsmasq
 
