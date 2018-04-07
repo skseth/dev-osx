@@ -1,0 +1,38 @@
+# Defines our Vagrant environment
+#
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+
+  # create mgmt node
+  config.vm.define :mgmt do |mgmt_config|
+      mgmt_config.vm.box = "local-xenial64"
+      mgmt_config.vm.hostname = "mgmt"
+      mgmt_config.vm.network :private_network, ip: "10.0.15.10"
+      mgmt_config.vm.provider "virtualbox" do |vb|
+        vb.memory = "256"
+      end
+
+
+      # from : http://ermaker.github.io/blog/2015/11/18/change-insecure-key-to-my-own-key-on-vagrant.html
+      mgmt_config.ssh.private_key_path = ["~/.ssh/id_rsa", "~/.vagrant.d/insecure_private_key"]
+      mgmt_config.ssh.forward_agent    = true
+      mgmt_config.ssh.insert_key = false
+      mgmt_config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
+      mgmt_config.vm.provision "shell", inline: <<-EOC
+        sudo sed -i -e "\\#PasswordAuthentication yes# s#PasswordAuthentication yes#PasswordAuthentication no#g" /etc/ssh/sshd_config
+        sudo service ssh restart
+      EOC
+      # end insecure key substitution
+
+      mgmt_config.vm.provision :shell, path: "bootstrap-mgmt.sh"
+
+  end
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  end
+
+end
